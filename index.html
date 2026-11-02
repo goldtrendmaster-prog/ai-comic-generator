@@ -3,181 +3,1508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Comic Storyboard & Xpro Studio Suite</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+    <title>Xpro Image Videos - AI Content Suite</title>
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/konva@9.3.6/konva.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        body { background-color: #09090b; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass-panel { background: rgba(19, 19, 26, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; }
-        .input-modern { width: 100%; padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0.75rem; color: #fff; outline: none; }
-        .input-modern:focus { border-color: #a855f7; ring: 2px; }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lobster&family=Roboto:wght@400;700&family=Playfair+Display:wght@700&family=Montserrat:wght@400;700&family=Pacifico&family=Oswald:wght@400;700&family=Lato:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;700&family=Nunito:wght@400;700&family=Caveat:wght@700&family=Bebas+Neue&family=Dancing+Script:wght@700&family=Creepster&family=Bangers&family=Cinzel+Decorative:wght@700&family=Nosifier&display=swap" rel="stylesheet">
+    
+    <style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        .bg-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        .glass-panel {
+            @apply bg-[#13131a]/70 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300;
+        }
+        .glass-panel:hover {
+            @apply border-white/20 shadow-[0_8px_40px_rgba(147,51,234,0.1)];
+        }
+
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: #a855f7;
+            border-right-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        .loader-ring::after {
+            content: '';
+            position: absolute;
+            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: #ec4899;
+            border-left-color: #8b5cf6;
+            animation: spin 2s linear infinite reverse;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-primary {
+            @apply relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] transform hover:-translate-y-1;
+            background-size: 200% auto;
+        }
+        .btn-primary:hover { background-position: right center; }
+        
+        .style-preset-btn { @apply px-4 py-1.5 text-xs font-medium border border-white/10 bg-white/5 rounded-full hover:bg-white/10 hover:border-purple-500/50 transition-all duration-200 cursor-pointer; }
+        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+        
+        .input-modern { @apply w-full p-4 bg-gray-900/80 border border-gray-600/60 rounded-2xl text-white focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition-all outline-none shadow-inner; color: #ffffff !important; }
+        .input-modern::placeholder { color: #9ca3af; opacity: 1; }
+        
+        select.input-modern { 
+            background-color: #1f2937 !important; 
+            color: #ffffff !important; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+        select option { background-color: #111827 !important; color: #ffffff !important; }
+        
+        .editor-accordion { @apply border border-white/5 bg-[#1a1a24]/60 rounded-2xl overflow-hidden transition-all duration-300; }
+        .editor-accordion-header { @apply p-4 cursor-pointer flex justify-between items-center list-none font-medium; -webkit-tap-highlight-color: transparent; }
+        .editor-accordion-header::-webkit-details-marker { display: none; }
+        .editor-accordion-header::after { content: '›'; font-size: 1.5rem; color: #a78bfa; transform: rotate(0); transition: transform 0.2s ease; }
+        .editor-accordion[open] > .editor-accordion-header { @apply border-b border-white/5 bg-white/5; }
+        .editor-accordion[open] > .editor-accordion-header::after { transform: rotate(90deg); }
+        .editor-accordion-content { @apply p-4 space-y-4; }
+        
+        .history-thumb { @apply w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-purple-500 cursor-pointer transition-all hover:scale-105; }
+        
+        .cropper-view-box, .cropper-face { border-radius: 8px; }
+        .cropper-point { background-color: #a855f7; width: 10px; height: 10px; border-radius: 50%; }
+        .cropper-line { background-color: rgba(168, 85, 247, 0.5); }
+        
+        .text-gradient { @apply text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        
+        .konvajs-content { width: 100% !important; height: 100% !important; }
+        .konvajs-content canvas { width: 100% !important; height: 100% !important; object-fit: contain; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="antialiased min-h-screen relative flex flex-col">
 
-    <!-- Header Navigation -->
-    <header class="bg-[#13131a] border-b border-white/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="absolute inset-0 bg-pattern opacity-50"></div>
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-600/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <nav class="w-full p-6 flex justify-between items-center relative z-40 max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
             <div>
-                <h1 class="text-sm md:text-base font-bold text-white tracking-wide">AI COMIC & XPRO STUDIO SUITE</h1>
-                <p class="text-[10px] text-purple-400 font-medium uppercase">Storyboard Generator & Image Creator</p>
+                <h1 class="text-xl font-bold tracking-tight text-white">Xpro <span class="text-gradient">Studio</span></h1>
+                <p class="text-[10px] text-gray-400 font-medium tracking-wider uppercase">AI Content Creator</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <button onclick="switchWorkspace('storyboard')" id="nav-btn-storyboard" class="px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold transition shadow">
-                <i class="fa-solid fa-book-open mr-1"></i> Storyboard Komik
-            </button>
-            <button onclick="switchWorkspace('xpro')" id="nav-btn-xpro" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-semibold transition border border-white/10">
-                <i class="fa-solid fa-image mr-1"></i> Xpro Studio AI
-            </button>
-        </div>
-    </header>
+        
+        <button id="settings-btn" class="glass-panel p-2.5 hover:bg-white/10 text-gray-400 hover:text-white transition-all rounded-full group relative z-50 cursor-pointer" title="Pengaturan Sistem">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:rotate-45 transition-transform duration-300 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+    </nav>
 
-    <!-- WORKSPACE 1: STORYBOARD KOMIK -->
-    <main id="workspace-storyboard" class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
-        <div class="glass-panel p-6 space-y-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-pen-nib text-purple-400"></i> Generator Skenario & Prompt Komik Manhua
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Judul Proyek</label>
-                    <input type="text" id="sb-title" class="input-modern text-sm" value="Kisah Pendekar Bayangan">
+    <div class="container mx-auto p-4 md:p-6 flex-grow flex flex-col">
+        
+        <div id="page-generation" class="max-w-6xl mx-auto w-full transition-opacity duration-500 ease-in-out block">
+            
+            <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 mt-6">
+                
+                <div class="lg:col-span-7 space-y-6 flex flex-col animate-fade-in delay-100">
+                    <div class="glass-panel p-7 flex-grow flex flex-col relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500 z-0 pointer-events-none"></div>
+                        
+                        <div class="relative z-10 flex-grow flex flex-col">
+                            <label for="style-prompt" class="text-xl font-bold text-white flex items-center gap-3 mb-5">
+                            <div class="p-2 bg-purple-500/20 rounded-xl"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></div>
+                            Deskripsi Gambar
+                        </label>
+                        
+                        <div class="relative flex-grow flex flex-col group/input">
+                            <textarea id="style-prompt" rows="6" placeholder="Gambarkan apa yang ada di pikiran Anda secara detail...&#10;(Misal: Sebuah kota cyberpunk bercahaya neon di bawah hujan lebat dengan pantulan air yang realistis, 8k, cinematic)" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-2xl text-black focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all outline-none shadow-inner flex-grow resize-none text-lg font-bold tracking-wide leading-relaxed pb-16 placeholder-gray-500" style="color: #000000 !important;"></textarea>
+                            
+                            <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                                <button id="save-prompt-btn" type="button" class="text-xs bg-purple-900/60 hover:bg-purple-800 border border-purple-500/50 text-purple-200 hover:text-white rounded-xl px-3 py-2 transition-all duration-300 shadow-md flex items-center gap-1.5 backdrop-blur-md" title="Simpan Prompt Ini">
+                                    <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                    <span>Simpan Prompt</span>
+                                </button>
+                                <div id="magic-loader" class="hidden mr-2"><div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div></div>
+                                    <button id="magic-prompt-btn" class="text-xs bg-gray-800/80 hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-600 border border-gray-600 hover:border-transparent text-gray-300 hover:text-white rounded-xl px-4 py-2 transition-all duration-300 shadow-lg flex items-center gap-2 backdrop-blur-md">
+                                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>Perkaya Prompt</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Perpustakaan Prompt Tersimpan -->
+                            <div id="saved-prompts-section" class="mt-4 hidden">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs text-purple-300 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                        Prompt Tersimpan Saya:
+                                    </p>
+                                    <button id="clear-saved-prompts-btn" class="text-[10px] text-gray-500 hover:text-red-400 transition-colors">Hapus Semua</button>
+                                </div>
+                                <div id="saved-prompts-list" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto custom-scrollbar pr-1"></div>
+                            </div>
+
+                            <div class="mt-6">
+                                <p class="text-xs text-gray-500 font-medium mb-3 uppercase tracking-wider">Inspirasi Gaya:</p>
+                                <div id="style-presets" class="flex flex-wrap gap-2.5">
+                                    <button class="style-preset-btn" data-prompt="Cinematic lighting, 8k resolution, highly detailed, photorealistic, dramatic shadows">🎬 Cinematic</button>
+                                    <button class="style-preset-btn" data-prompt="Cyberpunk style, neon lights, highly detailed, futuristic city background, vibrant colors">🌆 Cyberpunk</button>
+                                    <button class="style-preset-btn" data-prompt="Studio Ghibli style, vibrant colors, lush greenery, anime, beautiful scenery, masterpiece">🍃 Ghibli</button>
+                                    <button class="style-preset-btn" data-prompt="3D Pixar style character, cute, soft lighting, incredibly detailed, 4k render">🎈 3D Pixar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="generate-button" class="btn-primary w-full py-5 text-xl rounded-3xl flex items-center justify-center gap-3 group border-2 border-teal-400 hover:border-teal-300 shadow-[0_0_25px_rgba(45,212,191,0.4)] hover:shadow-[0_0_35px_rgba(45,212,191,0.6)]">
+                        <svg class="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        <span>Mulai Generate AI</span>
+                        <svg class="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Gaya Visual Komik</label>
-                    <select id="sb-style" class="input-modern text-sm bg-gray-900">
-                        <option value="Manhua Drama China Realistis Sinematik (Xianxia/Wuxia)">Manhua Drama China (Xianxia/Wuxia)</option>
-                        <option value="Webtoon Clean Line Art & Cel Shading">Modern Webtoon Style</option>
-                        <option value="Manga Hitam Putih Shonen Speedlines">Manga Shonen Jepang</option>
-                    </select>
+
+                <div class="lg:col-span-5 space-y-6 animate-fade-in delay-200">
+                    
+                    <div class="glass-panel p-7 transition-all duration-300">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2 mb-5 pb-4 border-b border-gray-700/50">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            Pengaturan Gambar Lanjutan
+                        </h3>
+                        
+                        <div class="grid grid-cols-2 gap-5">
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Rasio Aspek</label>
+                                <select id="aspect-ratio-select" class="input-modern py-2.5 text-sm font-medium">
+                                    <option value="portrait">📱 Potret (9:16)</option>
+                                    <option value="portrait_45">📸 Potret IG (4:5)</option>
+                                    <option value="square">🖼️ Persegi (1:1)</option>
+                                    <option value="landscape">📺 Lanskap (16:9)</option>
+                                    <option value="laptop">💻 Layar (16:10)</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Kualitas</label>
+                                <select id="quality-select" class="input-modern py-2.5 text-sm font-medium">
+                                    <option value="standard">HD Standar</option>
+                                    <option value="2k">2K (QHD) Tajam</option>
+                                    <option value="4k">4K (UHD) Detail</option>
+                                    <option value="8k">8K Masterpiece</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Jenis Gaya</label>
+                                <select id="image-type-select" class="input-modern py-2.5 text-sm font-medium">
+                                    <option value="realistic photo">Foto Realistis</option>
+                                    <option value="digital art">Seni Digital</option>
+                                    <option value="oil painting">Lukisan Klasik</option>
+                                    <option value="anime style">Gaya Anime</option>
+                                    <option value="cinematic shot">Sinematik</option>
+                                    <option value="3d render">3D Render</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Kamera</label>
+                                <select id="camera-angle-select" class="input-modern py-2.5 text-sm font-medium">
+                                    <option value="">Normal (Auto)</option>
+                                    <option value="eye-level shot">Sejajar Mata</option>
+                                    <option value="low-angle shot">Dari Bawah</option>
+                                    <option value="high-angle shot">Dari Atas</option>
+                                    <option value="drone shot">Tampilan Drone</option>
+                                    <option value="macro shot">Makro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Hapus Teks -->
+                        <div class="mt-5 pt-4 border-t border-gray-700/50 flex items-center justify-between">
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Hapus Teks/Watermark Referensi</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Abaikan tulisan, CC, atau logo pada gambar referensi.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="remove-text-ref-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-7 border-dashed border border-white/10 hover:border-purple-500/40 transition-all duration-300">
+                        <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-700/50">
+                            <div>
+                                <h3 class="text-md font-bold text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    Gambar Referensi (Opsional)
+                                </h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Unggah atau tempel (Paste) foto untuk memotong (crop) & jadikan acuan.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3 overflow-x-auto custom-scrollbar pt-2" id="upload-slots-container">
+                            <script>
+                                for(let i=1; i<=5; i++) {
+                                    const isHidden = i > 1 ? 'hidden' : '';
+                                    document.write(`
+                                    <div class="flex-shrink-0 w-28 flex flex-col gap-1.5 ${isHidden} transition-all duration-300" id="upload-slot-${i}">
+                                         <div class="w-full h-24 relative">
+                                             <input type="file" id="image-upload-${i}" accept="image/*" class="sr-only">
+                                             <label for="image-upload-${i}" id="image-drop-area-${i}" class="absolute inset-0 flex flex-col justify-center items-center bg-[#09090b] border border-gray-700 border-dashed rounded-2xl cursor-pointer hover:bg-purple-900/10 hover:border-purple-400/50 transition-all group shadow-inner">
+                                                <svg class="h-6 w-6 text-gray-500 group-hover:text-purple-400 transition-colors mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                <p class="text-[10px] text-gray-500 font-medium group-hover:text-purple-300">Slot ${i}</p>
+                                             </label>
+                                             <div id="image-preview-${i}" class="absolute inset-0 hidden group w-full h-full rounded-2xl overflow-hidden border border-purple-500/50 shadow-md">
+                                                 <img class="w-full h-full object-cover">
+                                                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 backdrop-blur-[2px]">
+                                                     <button class="image-crop-btn bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 shadow-lg transform hover:scale-110 transition-transform" title="Potong">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
+                                                     </button>
+                                                     <button class="image-remove-btn bg-rose-500 hover:bg-rose-600 text-white rounded-full p-1.5 shadow-lg transform hover:scale-110 transition-transform" title="Hapus">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                     </button>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         <input type="text" id="image-label-${i}" placeholder="Nama subjek..." class="w-full bg-[#1f2937] border border-gray-600 rounded-lg text-white text-[10px] px-2 py-1.5 focus:border-purple-400 outline-none text-center placeholder-gray-400" title="Beri nama atau keterangan karakter untuk AI">
+                                    </div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1">Sinopsis / Naskah Cerita</label>
-                <textarea id="sb-synopsis" rows="3" class="input-modern text-sm" placeholder="Tuliskan naskah atau sinopsis penuh intrik dan cliffhanger..."></textarea>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button onclick="generateStoryboardScenes()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow hover:opacity-90 transition">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Buat Adegan & Prompt AI
+            </main>
+        </div>
+
+        <div id="page-editor" class="max-w-7xl mx-auto w-full transition-opacity duration-300 ease-in-out opacity-0" style="display: none;">
+            
+            <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Studio Editor
+                    </h2>
+                    <p class="text-sm text-gray-400">Tambahkan teks, filter, atau ubah menjadi video.</p>
+                </div>
+                <button id="back-to-ai-settings-btn" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Kembali Edit
                 </button>
             </div>
-        </div>
 
-        <div id="sb-scenes-container" class="space-y-4">
-            <!-- Dynamic Scenes -->
-        </div>
-    </main>
+            <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <div class="lg:col-span-3 space-y-4 order-2 lg:order-1 max-h-[75vh] overflow-y-auto custom-scrollbar pr-2">
+                    
+                    <details class="editor-accordion">
+                        <summary class="editor-accordion-header">Filter Visual</summary>
+                        <div class="editor-accordion-content">
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Kecerahan</span><span id="val-brightness">0</span></div>
+                                    <input type="range" id="filter-brightness" min="-1" max="1" step="0.05" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Kontras</span><span id="val-contrast">0</span></div>
+                                    <input type="range" id="filter-contrast" min="-100" max="100" step="1" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Saturasi</span><span id="val-saturation">0</span></div>
+                                    <input type="range" id="filter-saturation" min="-2" max="5" step="0.1" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <button id="reset-filters-btn" class="text-xs w-full py-1.5 rounded bg-gray-800 hover:bg-gray-700 transition-colors text-gray-300">Reset Filter</button>
+                            </div>
+                        </div>
+                    </details>
 
-    <!-- WORKSPACE 2: XPRO STUDIO AI -->
-    <main id="workspace-xpro" class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6 hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-7 space-y-6">
-                <div class="glass-panel p-6 space-y-4">
-                    <label class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-align-left text-purple-400"></i> Deskripsi Gambar (Prompt)
-                    </label>
-                    <div class="relative">
-                        <textarea id="xpro-prompt" rows="5" class="input-modern text-sm font-semibold pb-12" placeholder="Gambarkan apa yang ada di pikiran Anda secara detail..."></textarea>
-                        <button onclick="enhancePrompt()" class="absolute bottom-3 right-3 text-xs bg-gray-800 hover:bg-purple-600 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-bolt text-yellow-400"></i> Perkaya Prompt
+                    <details class="editor-accordion" open>
+                        <summary class="editor-accordion-header">Teks Judul</summary>
+                        <div class="editor-accordion-content space-y-3">
+                            <textarea id="title-input" rows="2" placeholder="Ketik judul utama..." class="input-modern py-2 text-sm"></textarea>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="title-font-family" class="input-modern py-2 text-sm p-1"><option value="Bebas Neue">Bebas Neue</option><option value="Montserrat">Montserrat</option><option value="Creepster">Creepster</option><option value="Bangers">Bangers</option><option value="Cinzel Decorative">Cinzel</option><option value="Oswald">Oswald</option></select>
+                                <div class="flex items-center gap-2 bg-gray-950/50 border border-gray-700/50 rounded-xl px-2">
+                                    <label class="text-xs text-gray-400 w-full">Warna</label>
+                                    <input type="color" id="title-color" value="#FFFFFF" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0 p-0">
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-white/5">
+                                <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer">
+                                    <input type="checkbox" id="title-stroke-enabled" class="rounded text-purple-600 bg-gray-800 border-gray-600"> 
+                                    <span>Garis Tepi (Outline)</span>
+                                </label>
+                                <div id="title-stroke-controls" class="hidden mt-3 space-y-3">
+                                    <div class="flex items-center justify-between bg-gray-950/50 border border-gray-700/50 rounded-xl px-3 py-1.5">
+                                        <label class="text-xs text-gray-400">Warna Outline</label>
+                                        <input type="color" id="title-stroke-color" value="#000000" class="h-5 w-5 rounded cursor-pointer bg-transparent border-0 p-0">
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Ketebalan</span><span id="title-stroke-width-val">2px</span></div>
+                                        <input type="range" id="title-stroke-width" min="0.5" max="20" step="0.5" value="2" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="editor-accordion">
+                        <summary class="editor-accordion-header">Teks Isi (Sub)</summary>
+                        <div class="editor-accordion-content space-y-3">
+                            <textarea id="body-text-input" rows="2" placeholder="Sub-judul atau deskripsi..." class="input-modern py-2 text-sm"></textarea>
+                            <select id="body-font-family" class="input-modern py-2 text-sm"><option value="Inter">Inter</option><option value="Roboto">Roboto</option><option value="Poppins">Poppins</option><option value="Lobster">Lobster</option><option value="Playfair Display">Playfair</option></select>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-gray-950/50 border border-gray-700/50 rounded-xl p-2 flex flex-col items-center">
+                                    <label class="text-[10px] text-gray-400 mb-1">Gradasi Awal</label>
+                                    <input type="color" id="body-gradient-color-start" value="#FFFFFF" class="w-full h-6 rounded cursor-pointer bg-transparent border-0 p-0">
+                                </div>
+                                <div class="bg-gray-950/50 border border-gray-700/50 rounded-xl p-2 flex flex-col items-center">
+                                    <label class="text-[10px] text-gray-400 mb-1">Gradasi Akhir</label>
+                                    <input type="color" id="body-gradient-color-end" value="#a855f7" class="w-full h-6 rounded cursor-pointer bg-transparent border-0 p-0">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button id="reset-button" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-2.5 rounded-xl transition text-sm font-medium mt-4">Bersihkan Kanvas</button>
+                </div>
+
+                <div class="lg:col-span-9 flex flex-col items-center order-1 lg:order-2">
+                     
+                     <div class="relative glass-panel p-2 md:p-4 mb-6 shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full flex justify-center">
+                         <div id="canvas-wrapper" class="w-full relative bg-black/80 rounded-2xl border border-gray-800 overflow-hidden transition-all duration-300 min-h-[400px] flex items-center justify-center">
+                            <div id="canvas-container" class="absolute inset-0 w-full h-full"></div>
+                         </div>
+                     </div>
+                     
+                     <div class="glass-panel py-3.5 px-6 rounded-full flex flex-wrap justify-center gap-2.5 items-center shadow-[0_10px_40px_rgba(0,0,0,0.6)] border border-white/10 mx-auto max-w-fit animate-fade-in delay-200">
+                        <button id="regenerate-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 hover:border-purple-500/30 transition-all text-sm font-medium shadow-sm">
+                            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Buat Ulang
+                        </button>
+                        <div class="w-px h-8 bg-gray-700/50 mx-1 hidden sm:block"></div>
+                        <button id="video-scene-prompt-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-pink-600/10 hover:bg-pink-600/20 border border-pink-500/20 text-pink-300 hover:text-pink-200 transition-all text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Video AI
+                        </button>
+                        <button id="voiceover-prompt-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-teal-600/10 hover:bg-teal-600/20 border border-teal-500/20 text-teal-300 hover:text-teal-200 transition-all text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg> Narasi
+                        </button>
+                        <button id="caption-hashtag-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-300 hover:text-blue-200 transition-all text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg> Sosial
+                        </button>
+                        <div class="w-px h-8 bg-gray-700/50 mx-1 hidden sm:block"></div>
+                        <button id="download-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)] text-sm ml-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Simpan
+                        </button>
+                     </div>
+
+                     <div id="history-container" class="w-full max-w-2xl mt-6 p-3 glass-panel items-center gap-3 overflow-x-auto custom-scrollbar hidden"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="full-screen-loader" class="fixed inset-0 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none z-[9999]" style="display: none;">
+        <div class="loader-ring"></div>
+        <div class="mt-8 bg-gray-900/80 backdrop-blur border border-purple-500/50 px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+            <span class="flex h-3 w-3 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+            </span>
+            <h2 class="text-lg font-semibold text-white tracking-wide">AI sedang menciptakan mahakarya...</h2>
+        </div>
+        <p id="loader-text" class="text-sm text-gray-400 mt-3 font-medium">Harap tunggu beberapa detik.</p>
+    </div>
+
+    <div id="global-drag-overlay" class="fixed inset-0 bg-purple-900/70 backdrop-blur-md z-[10000] flex flex-col items-center justify-center border-4 border-dashed border-purple-400 m-4 rounded-3xl pointer-events-none transition-opacity duration-300 opacity-0" style="display: none;">
+        <svg class="w-24 h-24 text-purple-300 mb-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        <h2 class="text-4xl font-extrabold text-white tracking-wide drop-shadow-lg mb-2">Lepaskan Gambar Di Sini</h2>
+        <p class="text-purple-200 text-lg font-medium">Gambar akan otomatis ditambahkan ke slot referensi yang kosong</p>
+    </div>
+    
+    <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-md relative flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> Pengaturan Sistem</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">API Key Google Gemini (Opsional)</label>
+                    <input type="password" id="api-key-input" placeholder="Masukkan API Key Anda..." class="input-modern">
+                    <p class="text-[10px] text-gray-500 mt-2">Kosongkan jika ingin menggunakan kunci default bawaan sistem.</p>
+                </div>
+                <button id="save-settings-btn" class="w-full btn-primary py-3 mt-4">Simpan Konfigurasi</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="crop-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-3xl h-[85vh] flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg> Sesuaikan Gambar</h3>
+                <button class="modal-close text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="flex-grow bg-black/80 rounded-xl overflow-hidden relative border border-gray-700 flex items-center justify-center mb-4">
+                <img id="crop-target-image" class="block max-w-full max-h-full">
+            </div>
+            <div class="flex justify-between items-center">
+                <div class="flex gap-2">
+                    <button id="rotate-left-btn" class="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-300 hover:text-white transition border border-gray-700" title="Putar Kiri 90 derajat">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg> Kiri
+                    </button>
+                    <button id="rotate-right-btn" class="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-300 hover:text-white transition border border-gray-700" title="Putar Kanan 90 derajat">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg> Kanan
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                     <button id="cancel-crop-btn" class="px-6 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-800 transition border border-gray-700">Batal</button>
+                     <button id="apply-crop-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-xl transition shadow-lg shadow-blue-500/30">Terapkan Potongan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="video-scene-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-3">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2"><span class="text-2xl">🎬</span> Studio Storyboard Video</h3>
+                <button class="modal-close text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 space-y-5">
+                <div class="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 p-4 rounded-xl border border-purple-500/30 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white mb-1">Deteksi Karakter Pintar</h4>
+                        <p class="text-xs text-gray-400">Biarkan AI Vision menganalisis gambar untuk menemukan siapa saja yang bisa berbicara.</p>
+                    </div>
+                    <button id="analyze-scene-btn" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition shadow-lg shadow-purple-500/30 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Analisis Visual
+                    </button>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-end mb-3">
+                        <label class="block text-sm font-medium text-gray-300">Skrip Dialog Karakter</label>
+                        <button id="add-dialogue-btn" class="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 bg-purple-500/10 px-2 py-1 rounded">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Manual
                         </button>
                     </div>
+                    <div id="dialogue-container" class="space-y-3"></div>
                 </div>
-
-                <button onclick="runXproGenerate()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition text-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Mulai Generate AI
-                </button>
-            </div>
-
-            <div class="lg:col-span-5 space-y-6">
-                <div class="glass-panel p-6 space-y-4">
-                    <h3 class="text-md font-bold text-white border-b border-white/10 pb-3">Pengaturan Lanjutan</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Rasio Aspek</label>
-                            <select id="xpro-aspect" class="input-modern text-xs">
-                                <option value="9:16">Potret (9:16)</option>
-                                <option value="1:1">Persegi (1:1)</option>
-                                <option value="16:9">Lanskap (16:9)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Kualitas</label>
-                            <select id="xpro-quality" class="input-modern text-xs">
-                                <option value="standard">HD Standar</option>
-                                <option value="4k">4K UHD</option>
-                                <option value="8k">8K Masterpiece</option>
-                            </select>
-                        </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Instruksi Gerakan & Kamera (Opsional)</label>
+                    <textarea id="video-custom-instruction" rows="2" placeholder="Contoh: Kamera perlahan mendekat (zoom in), daun berguguran, air beriak perlahan..." class="input-modern py-2 text-sm"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1 uppercase">Bahasa</label>
+                        <select id="video-language-select" class="input-modern py-1.5 text-xs"><option value="Indonesia">Indonesia</option><option value="Inggris">Inggris</option><option value="Jepang">Jepang</option></select>
                     </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1 uppercase">Durasi</label>
+                        <select id="video-duration" class="input-modern py-1.5 text-xs"><option value="8">8 Detik</option><option value="16">16 Detik</option><option value="24">24 Detik</option></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1 uppercase">Nada Adegan</label>
+                        <select id="video-tone-select" class="input-modern py-1.5 text-xs"><option value="Netral">Netral</option><option value="Ceria">Ceria / Komedi</option><option value="Sedih">Dramatis</option></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1 uppercase">Musik Latar</label>
+                        <select id="video-bgm-select" class="input-modern py-1.5 text-xs"><option value="None">Hening</option><option value="Cinematic">Cinematic Epic</option><option value="Lo-fi">Lo-fi Chill</option></select>
+                    </div>
+                </div>
+                
+                <button id="generate-video-prompt-btn" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-pink-500/30 mt-2">✨ Generate Prompt Sutradara Video</button>
+                
+                <div id="video-prompt-result" class="hidden space-y-2 pt-4 border-t border-gray-800">
+                    <label class="block text-sm font-medium text-pink-300">Hasil Prompt (Visual + Audio) Siap Salin:</label>
+                    <textarea id="video-output" rows="6" class="input-modern font-mono text-xs text-gray-300"></textarea>
+                    <button id="copy-video-prompt-btn" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Salin Seluruh Prompt
+                    </button>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <script>
-        function switchWorkspace(mode) {
-            const sb = document.getElementById('workspace-storyboard');
-            const xp = document.getElementById('workspace-xpro');
-            const btnSb = document.getElementById('nav-btn-storyboard');
-            const btnXp = document.getElementById('nav-btn-xpro');
+    <div id="voiceover-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-2xl flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="text-xl">🎤</span> Skrip Narasi Voiceover</h3>
+                <button class="modal-close text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <textarea id="voiceover-output" rows="8" class="input-modern"></textarea>
+        </div>
+    </div>
+    
+    <div id="caption-hashtag-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-2xl flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="text-xl">📱</span> Ide Caption & Hashtag</h3>
+                <button class="modal-close text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <textarea id="caption-output" rows="6" class="input-modern mb-3"></textarea>
+            <div id="hashtags-output" class="text-blue-400 text-sm font-medium bg-blue-900/20 p-3 rounded-xl border border-blue-500/20"></div>
+        </div>
+    </div>
 
-            if (mode === 'storyboard') {
-                sb.classList.remove('hidden');
-                xp.classList.add('hidden');
-                btnSb.className = "px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold transition shadow";
-                btnXp.className = "px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-semibold transition border border-white/10";
-            } else {
-                xp.classList.remove('hidden');
-                sb.classList.add('hidden');
-                btnXp.className = "px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold transition shadow";
-                btnSb.className = "px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-semibold transition border border-white/10";
-            }
-        }
-
-        function generateStoryboardScenes() {
-            const title = document.getElementById('sb-title').value;
-            const style = document.getElementById('sb-style').value;
-            const container = document.getElementById('sb-scenes-container');
-            
-            container.innerHTML = `
-                <div class="glass-panel p-5 space-y-3">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
-                        <span class="text-xs font-bold text-purple-400">#1 Adegan Utama: ${title}</span>
-                        <span class="text-[10px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">Siap Pakai</span>
-                    </div>
-                    <p class="text-xs text-gray-300">Karakter utama berdiri di puncak tebing dengan tatapan tajam dan penuh perhitungan.</p>
-                    <div class="bg-gray-950 p-3 rounded-xl border border-white/10 font-mono text-xs text-purple-300">
-                        Prompt: ${style}, Wide Angle, dramatic sunset lighting, speech bubble "Takdir ada di tanganku...", sound effect SWOOSH!, 8k.
-                    </div>
-                    <div class="bg-pink-950/20 p-3 rounded-xl border border-pink-500/20 text-xs text-pink-200">
-                        Narasi Medsos (Max 300 Karakter): Babak baru pertarungan dimulai! Siapa yang akan bertahan? 😱🔥 #Manhua #FYP #Webtoon
-                    </div>
+    <!-- Modal Simpan Judul Prompt -->
+    <div id="save-prompt-modal" class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="display: none;">
+        <div class="modal-content glass-panel p-6 w-full max-w-md relative flex flex-col transform transition-transform duration-300 scale-95 opacity-0">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                Beri Judul Prompt
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5 uppercase tracking-wider">Judul / Nama Prompt</label>
+                    <input type="text" id="prompt-title-input" placeholder="Misal: Cyberpunk Neon, Portrait Ghibli..." class="input-modern py-3 text-sm">
                 </div>
-            `;
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Pratinjau Isi Prompt:</label>
+                    <p id="prompt-preview-text" class="text-xs text-gray-400 bg-gray-950/60 p-3 rounded-xl border border-gray-800 line-clamp-3 italic"></p>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button id="cancel-save-prompt-btn" class="flex-1 py-2.5 rounded-xl text-gray-300 hover:text-white hover:bg-gray-800 transition border border-gray-700 text-sm">Batal</button>
+                    <button id="confirm-save-prompt-btn" class="flex-1 btn-primary py-2.5 text-sm font-semibold">Simpan ke Cloud</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modul Firebase & Firestore Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Konfigurasi & Inisialisasi Firebase
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "demo", authDomain: "demo.firebaseapp.com", projectId: "demo" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'xpro-studio-app';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let unsubscribePrompts = null;
+
+        // Autentikasi terlebih dahulu sebelum melakukan kueri Firestore
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Firebase Auth Error:", err);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                listenSavedPrompts(user.uid);
+            }
+        });
+
+        initAuth();
+
+        // Path Firestore: /artifacts/{appId}/users/{userId}/saved_prompts
+        function getPromptsCollectionRef(userId) {
+            return collection(db, 'artifacts', appId, 'users', userId, 'saved_prompts');
         }
 
-        function enhancePrompt() {
-            const promptInput = document.getElementById('xpro-prompt');
-            promptInput.value = (promptInput.value ? promptInput.value + ", " : "") + "Cinematic lighting, highly detailed, photorealistic masterpiece, 8k resolution, dramatic shadows";
+        // Listener Real-time Firestore untuk Prompt Tersimpan
+        function listenSavedPrompts(userId) {
+            if (unsubscribePrompts) unsubscribePrompts();
+
+            const promptsRef = getPromptsCollectionRef(userId);
+            unsubscribePrompts = onSnapshot(promptsRef, (snapshot) => {
+                const container = document.getElementById('saved-prompts-list');
+                const section = document.getElementById('saved-prompts-section');
+                if (!container || !section) return;
+
+                if (snapshot.empty) {
+                    section.classList.add('hidden');
+                    return;
+                }
+
+                section.classList.remove('hidden');
+                container.innerHTML = '';
+
+                snapshot.docs.forEach((docSnap) => {
+                    const promptData = docSnap.data();
+                    const promptText = promptData.text;
+                    const promptTitle = promptData.title || promptText; // Gunakan judul jika ada
+                    const docId = docSnap.id;
+
+                    const tag = document.createElement('div');
+                    tag.className = 'flex items-center gap-1.5 text-xs bg-purple-950/60 border border-purple-500/30 text-purple-200 px-3 py-1.5 rounded-xl hover:border-purple-400 hover:bg-purple-900/80 transition-all cursor-pointer group shadow-sm';
+
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'max-w-[150px] sm:max-w-[220px] truncate font-medium';
+                    textSpan.textContent = promptTitle;
+                    textSpan.title = `Judul: ${promptTitle}\n\nIsi: ${promptText}`;
+                    textSpan.onclick = () => {
+                        document.getElementById('style-prompt').value = promptText;
+                        if (window.showToast) window.showToast(`Prompt "${promptTitle}" dimuat!`, "info");
+                    };
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'text-purple-400 hover:text-red-400 transition-colors font-bold ml-1 text-sm';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.title = 'Hapus prompt ini';
+                    removeBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        try {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'saved_prompts', docId));
+                            if (window.showToast) window.showToast("Prompt berhasil dihapus", "info");
+                        } catch (err) {
+                            console.error("Gagal menghapus prompt:", err);
+                        }
+                    };
+
+                    tag.appendChild(textSpan);
+                    tag.appendChild(removeBtn);
+                    container.appendChild(tag);
+                });
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+            });
         }
 
-        function runXproGenerate() {
-            alert("Proses generate gambar Xpro Studio AI dimulai!");
-        }
+        // Ekspos fungsi simpan prompt dengan judul ke window
+        window.savePromptToCloud = async function(promptTitle, promptText) {
+            if (!currentUser) {
+                if (window.showToast) window.showToast("Menghubungkan ke layanan cloud...", "info");
+                return;
+            }
+            try {
+                const docId = 'prompt_' + Date.now();
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'saved_prompts', docId);
+                await setDoc(docRef, {
+                    title: promptTitle,
+                    text: promptText,
+                    createdAt: new Date().toISOString()
+                });
+                if (window.showToast) window.showToast(`Prompt "${promptTitle}" disimpan!`, "success");
+            } catch (err) {
+                console.error("Gagal menyimpan prompt ke cloud:", err);
+                if (window.showToast) window.showToast("Gagal menyimpan prompt ke cloud.", "error");
+            }
+        };
+
+        window.clearAllPromptsFromCloud = async function() {
+            if (!currentUser) return;
+            try {
+                const promptsRef = getPromptsCollectionRef(currentUser.uid);
+                const snapshot = await getDocs(promptsRef);
+                const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+                await Promise.all(deletePromises);
+                if (window.showToast) window.showToast("Semua prompt cloud dibersihkan", "info");
+            } catch (err) {
+                console.error("Gagal menghapus semua prompt:", err);
+            }
+        };
+    </script>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const envApiKey = ""; 
+            let userApiKey = localStorage.getItem('imasers_api_key') || "";
+            let lastGeneratedImageBase64 = null; 
+            
+            let originalImageWidth = 0;
+            let originalImageHeight = 0;
+            
+            const getApiKey = () => userApiKey || envApiKey;
+
+            const GEMINI_3_1_IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent`;
+            const TEXT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
+
+            let stage, layer, transformer, titleNode, bodyNode, currentImageNode;
+            let uploadedImagesBase64 = [null, null, null, null, null]; 
+            let selectedRatio = 'portrait';
+            let sessionHistory = []; 
+            let cropper = null;
+            let currentCropSlotId = null;
+
+            window.showToast = function(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                let colors = 'bg-gray-800 border-gray-600 text-white';
+                let icon = '';
+                
+                if (type === 'error') {
+                    colors = 'bg-red-900/90 border-red-500 text-red-100 shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+                    icon = '<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                } else if (type === 'success') {
+                    colors = 'bg-green-900/90 border-green-500 text-green-100 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+                    icon = '<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                } else {
+                    colors = 'bg-purple-900/90 border-purple-500 text-purple-100 shadow-[0_0_15px_rgba(168,85,247,0.3)]';
+                    icon = '<svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                }
+
+                toast.className = `pointer-events-auto px-4 py-3 rounded-xl border backdrop-blur-md transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 ${colors}`;
+                toast.innerHTML = `${icon}<span class="text-sm font-medium">${message}</span>`;
+                container.appendChild(toast);
+                
+                setTimeout(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }, 10);
+                setTimeout(() => { 
+                    toast.classList.add('translate-y-10', 'opacity-0'); 
+                    setTimeout(() => toast.remove(), 300); 
+                }, 3500);
+            };
+
+            function copyToClipboard(text, buttonElement, successText = "Tersalin!", originalText = "Salin Seluruh Prompt") {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalHTML = buttonElement.innerHTML;
+                    buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ${successText}`;
+                    buttonElement.classList.add('text-green-400', 'border-green-500');
+                    setTimeout(() => {
+                        buttonElement.innerHTML = originalHTML;
+                        buttonElement.classList.remove('text-green-400', 'border-green-500');
+                    }, 2000);
+                    showToast("Teks berhasil disalin ke clipboard!", "success");
+                } catch (err) { showToast("Gagal menyalin teks.", "error"); }
+                document.body.removeChild(textArea);
+            }
+
+            const $ = id => document.getElementById(id);
+            
+            const openModal = (id) => { 
+                const el = $(id);
+                el.style.display = 'flex';
+                void el.offsetWidth; 
+                el.classList.remove('opacity-0', 'pointer-events-none'); 
+                el.classList.add('pointer-events-auto');
+                
+                const content = el.querySelector('.modal-content');
+                if(content) {
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                }
+            };
+            
+            const closeModal = (id) => { 
+                const el = $(id);
+                el.classList.add('opacity-0', 'pointer-events-none'); 
+                el.classList.remove('pointer-events-auto');
+                
+                const content = el.querySelector('.modal-content');
+                if(content) {
+                    content.classList.remove('scale-100', 'opacity-100');
+                    content.classList.add('scale-95', 'opacity-0');
+                }
+                setTimeout(() => el.style.display = 'none', 300); 
+            };
+            
+            const closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => closeModal(m.id));
+            
+            document.querySelectorAll('.modal-close').forEach(b => b.onclick = closeAllModals);
+            document.querySelectorAll('.modal-overlay').forEach(m => {
+                m.addEventListener('click', (e) => { if(e.target === m) closeModal(m.id); });
+            });
+
+            $('settings-btn').onclick = () => { $('api-key-input').value = userApiKey; openModal('settings-modal'); };
+            $('save-settings-btn').onclick = () => {
+                userApiKey = $('api-key-input').value.trim();
+                localStorage.setItem('imasers_api_key', userApiKey);
+                closeModal('settings-modal');
+                showToast("Pengaturan API Key tersimpan!", "success");
+            };
+
+            function setPage(page) {
+                const pGen = $('page-generation');
+                const pEd = $('page-editor');
+                
+                if (page === 1) { 
+                    pEd.classList.add('opacity-0');
+                    setTimeout(() => {
+                        pEd.style.display = 'none';
+                        pGen.style.display = 'block'; 
+                        void pGen.offsetWidth;
+                        pGen.classList.remove('opacity-0');
+                        window.scrollTo(0,0);
+                    }, 300);
+                } else { 
+                    pGen.classList.add('opacity-0');
+                    setTimeout(() => {
+                        pGen.style.display = 'none';
+                        pEd.style.display = 'block';
+                        void pEd.offsetWidth;
+                        pEd.classList.remove('opacity-0');
+                        window.scrollTo(0,0);
+                    }, 300);
+                }
+            }
+
+            const refreshSlotsVisibility = () => {
+                let highest = 0;
+                for(let i=0; i<5; i++) { if(uploadedImagesBase64[i]) highest = i + 1; }
+                const showUpTo = Math.min(highest + 1, 5);
+                
+                for(let i=1; i<=5; i++) {
+                    const slot = $(`upload-slot-${i}`);
+                    if(slot) {
+                        if(i <= showUpTo) {
+                            slot.classList.remove('hidden');
+                            setTimeout(() => slot.classList.remove('opacity-0', 'scale-95'), 10);
+                        } else {
+                            slot.classList.add('hidden', 'opacity-0', 'scale-95');
+                        }
+                    }
+                }
+            };
+
+            const setupUpload = (id) => {
+                const input = $(`image-upload-${id}`);
+                const preview = $(`image-preview-${id}`);
+                const dropArea = $(`image-drop-area-${id}`);
+                if(!input || !preview || !dropArea) return;
+
+                input.onchange = e => handleFile(e.target.files[0], id);
+                
+                preview.querySelector('.image-remove-btn').onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    input.value = '';
+                    preview.classList.add('hidden');
+                    dropArea.classList.remove('hidden');
+                    uploadedImagesBase64[id-1] = null;
+                    refreshSlotsVisibility();
+                };
+
+                preview.querySelector('.image-crop-btn').onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    const img = preview.querySelector('img');
+                    if (img && img.src) openCropModalFunc(img.src, id);
+                };
+            };
+            
+            const handleFile = (file, id) => {
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const res = e.target.result;
+                    openCropModalFunc(res, id);
+                };
+                reader.readAsDataURL(file);
+            };
+
+            [1,2,3,4,5].forEach(setupUpload);
+
+            const globalDragOverlay = $('global-drag-overlay');
+            let dragCounter = 0;
+
+            document.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                dragCounter++;
+                globalDragOverlay.style.display = 'flex';
+                void globalDragOverlay.offsetWidth; 
+                globalDragOverlay.classList.remove('opacity-0');
+            });
+
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault(); 
+            });
+
+            document.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dragCounter--;
+                if (dragCounter === 0) {
+                    globalDragOverlay.classList.add('opacity-0');
+                    setTimeout(() => { if(dragCounter === 0) globalDragOverlay.style.display = 'none'; }, 300);
+                }
+            });
+
+            document.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragCounter = 0;
+                globalDragOverlay.classList.add('opacity-0');
+                setTimeout(() => globalDragOverlay.style.display = 'none', 300);
+
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        let emptySlotId = null;
+                        for(let i=1; i<=5; i++) {
+                            if(!uploadedImagesBase64[i-1]) {
+                                emptySlotId = i;
+                                break;
+                            }
+                        }
+                        if(emptySlotId) {
+                            handleFile(file, emptySlotId);
+                        } else {
+                            showToast("Semua slot referensi penuh!", "error");
+                        }
+                    } else {
+                        showToast("Hanya file gambar yang didukung!", "error");
+                    }
+                }
+            });
+
+            document.addEventListener('paste', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (!e.clipboardData) return;
+
+                const items = e.clipboardData.items;
+                let imageFile = null;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        imageFile = items[i].getAsFile();
+                        break;
+                    }
+                }
+
+                if (imageFile) {
+                    let emptySlotId = null;
+                    for(let i=1; i<=5; i++) {
+                        if(!uploadedImagesBase64[i-1]) {
+                            emptySlotId = i;
+                            break;
+                        }
+                    }
+                    if(emptySlotId) {
+                        handleFile(imageFile, emptySlotId);
+                    } else {
+                        showToast("Semua slot referensi penuh!", "error");
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            function openCropModalFunc(imageSrc, slotId) {
+                currentCropSlotId = slotId;
+                const img = $('crop-target-image');
+                if (cropper) { cropper.destroy(); cropper = null; }
+                img.src = ''; 
+                openModal('crop-modal');
+                img.onload = () => {
+                    setTimeout(() => {
+                        cropper = new Cropper(img, { viewMode: 1, dragMode: 'move', autoCropArea: 0.9, restore: false, guides: true, center: true, highlight: false, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false, background: false });
+                    }, 100); 
+                };
+                img.src = imageSrc;
+            }
+
+            $('cancel-crop-btn').onclick = () => { 
+                closeModal('crop-modal'); 
+                if (cropper) { cropper.destroy(); cropper = null; } 
+                if(currentCropSlotId) {
+                    const input = $(`image-upload-${currentCropSlotId}`);
+                    if(input) input.value = '';
+                }
+            };
+            
+            $('apply-crop-btn').onclick = () => {
+                if (!cropper) return;
+                const canvas = cropper.getCroppedCanvas();
+                const croppedDataUrl = canvas.toDataURL('image/png');
+                
+                const preview = $(`image-preview-${currentCropSlotId}`);
+                const dropArea = $(`image-drop-area-${currentCropSlotId}`);
+                const previewImg = preview.querySelector('img');
+                
+                previewImg.src = croppedDataUrl;
+                preview.classList.remove('hidden');
+                dropArea.classList.add('hidden');
+                
+                uploadedImagesBase64[currentCropSlotId - 1] = croppedDataUrl.split(',')[1];
+                
+                closeModal('crop-modal');
+                cropper.destroy(); cropper = null;
+                refreshSlotsVisibility();
+                showToast("Gambar berhasil diterapkan!", "success");
+            };
+
+            $('rotate-left-btn').onclick = () => { if (cropper) cropper.rotate(-90); };
+            $('rotate-right-btn').onclick = () => { if (cropper) cropper.rotate(90); };
+
+            $('aspect-ratio-select').onchange = (e) => { selectedRatio = e.target.value; };
+
+            $('magic-prompt-btn').onclick = async () => {
+                const input = $('style-prompt');
+                if (!input.value.trim()) return showToast("Tulis ide dasar di kolom prompt terlebih dahulu!", "error");
+                const btn = $('magic-prompt-btn');
+                const loader = $('magic-loader');
+                btn.disabled = true; loader.classList.remove('hidden');
+                try {
+                    const res = await fetch(`${TEXT_API_URL}?key=${getApiKey()}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: `Rewrite this image prompt to be highly detailed, cinematic, and artistically descriptive. Return ONLY the prompt text without intro/outro: "${input.value.trim()}".` }] }] })
+                    });
+                    const data = await res.json();
+                    input.value = data.candidates[0].content.parts[0].text.trim();
+                    showToast("Prompt berhasil diperkaya!", "success");
+                } catch(e) { 
+                    showToast("Gagal menghubungi AI teks.", "error"); 
+                } finally { 
+                    btn.disabled = false; loader.classList.add('hidden'); 
+                }
+            };
+
+            /* --- Manajemen Prompt Tersimpan dengan Judul --- */
+            $('save-prompt-btn').onclick = () => {
+                const currentText = $('style-prompt').value.trim();
+                if (!currentText) return showToast("Tulis prompt terlebih dahulu sebelum menyimpan!", "error");
+                
+                // Set pratinjau teks dan reset input judul
+                $('prompt-preview-text').textContent = currentText;
+                $('prompt-title-input').value = currentText.slice(0, 30) + (currentText.length > 30 ? '...' : '');
+                openModal('save-prompt-modal');
+                setTimeout(() => $('prompt-title-input').select(), 150);
+            };
+
+            $('cancel-save-prompt-btn').onclick = () => closeModal('save-prompt-modal');
+
+            $('confirm-save-prompt-btn').onclick = () => {
+                const titleVal = $('prompt-title-input').value.trim() || "Prompt Tanpa Judul";
+                const currentText = $('style-prompt').value.trim();
+                
+                if (window.savePromptToCloud) {
+                    window.savePromptToCloud(titleVal, currentText);
+                }
+                closeModal('save-prompt-modal');
+            };
+
+            $('clear-saved-prompts-btn').onclick = () => {
+                if (window.clearAllPromptsFromCloud) {
+                    window.clearAllPromptsFromCloud();
+                }
+            };
+
+            const performGeneration = async () => {
+                const promptVal = $('style-prompt').value.trim();
+                const qualityVal = $('quality-select').value;
+                if(!promptVal) return showToast("Silakan isi deskripsi gambar (prompt) terlebih dahulu!", "error");
+                
+                const fullLoader = $('full-screen-loader');
+                fullLoader.style.display = 'flex';
+                void fullLoader.offsetWidth;
+                fullLoader.classList.remove('opacity-0', 'pointer-events-none');
+                fullLoader.classList.add('pointer-events-auto');
+                
+                const btnGenerate = $('generate-button');
+                const btnRegen = $('regenerate-btn');
+                
+                [btnGenerate, btnRegen].forEach(btn => {
+                    if(btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+                });
+                
+                let qualityKeywords = "";
+                if (qualityVal === '8k') qualityKeywords = ", 8k resolution, masterpiece, highly detailed, sharp focus, stunning, photorealistic";
+                else if (qualityVal === '4k') qualityKeywords = ", 4k resolution, high quality, detailed, sharp";
+                else if (qualityVal === '2k') qualityKeywords = ", 2k resolution, clear";
+                
+                try {
+                    const hasRefImages = uploadedImagesBase64.some(i => i !== null);
+                    const type = $('image-type-select').value;
+                    const angle = $('camera-angle-select').value;
+                    const fullPrompt = `${type}, ${promptVal} ${angle ? ', '+angle : ''} ${qualityKeywords}`;
+                    let imageUrl = "";
+
+                    let apiRatio = '1:1';
+                    if (selectedRatio === 'portrait') apiRatio = '9:16';
+                    else if (selectedRatio === 'portrait_45') apiRatio = '3:4';
+                    else if (selectedRatio === 'landscape') apiRatio = '16:9';
+                    else if (selectedRatio === 'laptop') apiRatio = '16:9';
+                    else if (selectedRatio === 'square') apiRatio = '1:1';
+
+                    if (!hasRefImages) {
+                        const payload = {
+                            contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+                            generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: apiRatio } },
+                        };
+                        const res = await fetch(`${GEMINI_3_1_IMAGE_API_URL}?key=${getApiKey()}`, {
+                            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                        if(!part) throw new Error(data.error?.message || "Sistem AI sibuk atau menolak prompt tersebut.");
+                        imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                        lastGeneratedImageBase64 = part.inlineData.data;
+                    } else {
+                        let refInstructions = "";
+                        let hasLabels = false;
+                        
+                        uploadedImagesBase64.forEach((b64, index) => {
+                            if(b64) {
+                                const label = $(`image-label-${index + 1}`).value.trim();
+                                if (label) {
+                                    refInstructions += `Image ${index + 1} is/represents "${label}". `;
+                                    hasLabels = true;
+                                }
+                            }
+                        });
+
+                        let baseInstruction = `Create a professional composite or interpretation based on references. Style: ${fullPrompt}. Keep the core structure of the first image if possible.`;
+                        
+                        // Cek apakah toggle hapus teks diaktifkan
+                        const removeTextToggle = $('remove-text-ref-toggle');
+                        if (removeTextToggle && removeTextToggle.checked) {
+                            baseInstruction += " STRICTLY ignore, remove, and do not generate any text, watermarks, signatures, or closed captions (CC) present in the reference images. The final output MUST be completely text-free.";
+                        }
+
+                        const finalInstruction = hasLabels ? `${baseInstruction} Pay close attention to these specific subjects in the images: ${refInstructions}` : baseInstruction;
+
+                        const parts = [{ text: finalInstruction }];
+                        uploadedImagesBase64.forEach(b64 => { if(b64) parts.push({ inlineData: { mimeType: "image/png", data: b64 } }); });
+                        
+                        const payload = {
+                            contents: [{ role: 'user', parts: parts }],
+                            generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: apiRatio } },
+                        };
+                        const res = await fetch(`${GEMINI_3_1_IMAGE_API_URL}?key=${getApiKey()}`, {
+                            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                        if(!part) throw new Error(data.error?.message || "Sistem AI sibuk atau menolak referensi.");
+                        imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                        lastGeneratedImageBase64 = part.inlineData.data;
+                    }
+
+                    addToHistory(imageUrl);
+                    setPage(2);
+                    showToast("Gambar berhasil dibuat!", "success");
+                    setTimeout(() => initCanvas(imageUrl), 500);
+                    
+                } catch(e) {
+                    console.error(e);
+                    showToast("Gagal membuat gambar: " + e.message, "error");
+                } finally {
+                    fullLoader.classList.add('opacity-0', 'pointer-events-none');
+                    fullLoader.classList.remove('pointer-events-auto');
+                    setTimeout(() => fullLoader.style.display = 'none', 300);
+                    
+                    [btnGenerate, btnRegen].forEach(btn => {
+                        if(btn) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+                    });
+                }
+            };
+
+            $('generate-button').onclick = performGeneration;
+            $('regenerate-btn').onclick = performGeneration;
+
+            function initCanvas(imgUrl) {
+                const wrapper = $('canvas-wrapper');
+                let aspectClass = 'aspect-[16/9]';
+                let maxWClass = 'max-w-full';
+
+                if(selectedRatio === 'portrait') { aspectClass = 'aspect-[9/16]'; maxWClass = 'max-w-xs md:max-w-sm mx-auto'; }
+                else if(selectedRatio === 'portrait_45') { aspectClass = 'aspect-[4/5]'; maxWClass = 'max-w-sm md:max-w-md mx-auto'; }
+                else if(selectedRatio === 'square') { aspectClass = 'aspect-square'; maxWClass = 'max-w-md md:max-w-lg mx-auto'; }
+                else if(selectedRatio === 'laptop') { aspectClass = 'aspect-[16/10]'; maxWClass = 'max-w-4xl mx-auto'; }
+                else { aspectClass = 'aspect-video'; maxWClass = 'max-w-4xl mx-auto'; }
+
+                wrapper.className = `w-full relative bg-black/80 rounded-2xl border border-gray-800 overflow-hidden transition-all duration-300 min-h-[300px] ${aspectClass} ${maxWClass}`;
+
+                setTimeout(() => {
+                    const tempImg = new Image();
+                    tempImg.onload = function() {
+                        originalImageWidth = this.width;
+                        originalImageHeight = this.height;
+                        
+                        if(stage) stage.destroy();
+                        
+                        stage = new Konva.Stage({ 
+                            container: 'canvas-container', 
+                            width: originalImageWidth, 
+                            height: originalImageHeight 
+                        });
+                        
+                        layer = new Konva.Layer();
+                        stage.add(layer);
+
+                        transformer = new Konva.Transformer({ 
+                            nodes: [], 
+                            centeredScaling: true, 
+                            anchorStroke: '#a855f7', 
+                            anchorFill: '#fff', 
+                            anchorSize: 8, 
+                            borderStroke: '#a855f7', 
+                            padding: 5 
+                        });
+                        layer.add(transformer);
+
+                        stage.on('click tap', (e) => { 
+                            if (e.target === stage || e.target === currentImageNode) {
+                                transformer.nodes([]); 
+                            }
+                        });
+
+                        Konva.Image.fromURL(imgUrl, (imgNode) => {
+                            currentImageNode = imgNode;
+                            imgNode.setAttrs({ x: 0, y: 0, width: originalImageWidth, height: originalImageHeight });
+                            imgNode.cache();
+                            layer.add(imgNode); 
+                            imgNode.moveToBottom();
+                            addTextNodes(); 
+                            layer.batchDraw();
+                        });
+                    };
+                    tempImg.src = imgUrl;
+                }, 50);
+            }
+
+            function addTextNodes() {
+                const titleFontSize = Math.floor(stage.width() / 10);
+                const bodyFontSize = Math.floor(stage.width() / 20);
+                
+                titleNode = new Konva.Text({ 
+                    text: '', fontSize: titleFontSize, fontFamily: 'Bebas Neue', fill: '#ffffff', draggable: true, 
+                    x: stage.width() / 2, y: stage.height() * 0.1, align: 'center', shadowColor: 'black', 
+                    shadowBlur: 10, shadowOffset: {x: 2, y: 2}, shadowOpacity: 0.5 
+                });
+                titleNode.offsetX(titleNode.width()/2); 
+                layer.add(titleNode);
+                
+                bodyNode = new Konva.Text({ 
+                    text: '', fontSize: bodyFontSize, fontFamily: 'Inter', fill: '#ffffff', draggable: true, 
+                    x: stage.width() / 2, y: stage.height() * 0.8, align: 'center', shadowColor: 'black', 
+                    shadowBlur: 5, shadowOffset: {x: 1, y: 1}, shadowOpacity: 0.8 
+                });
+                bodyNode.offsetX(bodyNode.width()/2); 
+                layer.add(bodyNode);
+
+                [titleNode, bodyNode].forEach(node => {
+                    node.on('click tap dragstart', () => { transformer.nodes([node]); node.moveToTop(); transformer.moveToTop(); });
+                });
+            }
+
+            const updateText = () => {
+                if(!titleNode || !bodyNode) return;
+                titleNode.text($('title-input').value.toUpperCase());
+                titleNode.fontFamily($('title-font-family').value);
+                titleNode.fill($('title-color').value);
+                
+                if($('title-stroke-enabled').checked) {
+                    titleNode.stroke($('title-stroke-color').value);
+                    const baseStrokeW = parseFloat($('title-stroke-width').value);
+                    const scaledStrokeW = baseStrokeW * (stage.width() / 800); 
+                    titleNode.strokeWidth(scaledStrokeW);
+                    $('title-stroke-width-val').textContent = baseStrokeW + 'px';
+                } else { titleNode.strokeWidth(0); }
+                titleNode.offsetX(titleNode.width()/2);
+
+                bodyNode.text($('body-text-input').value);
+                bodyNode.fontFamily($('body-font-family').value);
+                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const grad = ctx.createLinearGradient(0, 0, bodyNode.width() || 100, 0);
+                grad.addColorStop(0, $('body-gradient-color-start').value);
+                grad.addColorStop(1, $('body-gradient-color-end').value);
+                bodyNode.fillPriority('color');
+                bodyNode.fill(grad);
+
+                bodyNode.offsetX(bodyNode.width()/2);
+                layer.batchDraw();
+            };
+
+            ['title-input', 'title-font-family', 'title-color', 'title-stroke-enabled', 'title-stroke-color', 'title-stroke-width',
+             'body-text-input', 'body-font-family', 'body-gradient-color-start', 'body-gradient-color-end'].forEach(id => {
+                 const el = $(id); if(el) { el.oninput = updateText; el.onchange = updateText; }
+            });
+            
+            $('title-stroke-enabled').onchange = (e) => { 
+                const controls = $('title-stroke-controls');
+                if(e.target.checked) { controls.classList.remove('hidden'); } else { controls.classList.add('hidden'); }
+                updateText(); 
+            };
+
+            const updateFilters = () => {
+                if(!currentImageNode) return;
+                currentImageNode.filters([Konva.Filters.Brighten, Konva.Filters.Contrast, Konva.Filters.HSL]);
+                currentImageNode.brightness(parseFloat($('filter-brightness').value));
+                currentImageNode.contrast(parseFloat($('filter-contrast').value));
+                currentImageNode.saturation(parseFloat($('filter-saturation').value));
+                
+                $('val-brightness').innerText = $('filter-brightness').value;
+                $('val-contrast').innerText = $('filter-contrast').value;
+                $('val-saturation').innerText = $('filter-saturation').value;
+                
+                layer.batchDraw();
+            };
+            
+            ['filter-brightness', 'filter-contrast', 'filter-saturation'].forEach(id => $(id).oninput = updateFilters);
+            $('reset-filters-btn').onclick = () => { 
+                $('filter-brightness').value = 0; $('filter-contrast').value = 0; $('filter-saturation').value = 0; 
+                updateFilters(); showToast("Filter dikembalikan ke standar", "info");
+            };
+
+            function addToHistory(url) { sessionHistory.unshift(url); renderHistory(); }
+            function renderHistory() {
+                const container = $('history-container');
+                if(sessionHistory.length > 0) {
+                    container.classList.remove('hidden');
+                    container.style.display = 'flex';
+                }
+                container.innerHTML = '';
+                sessionHistory.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url; img.className = 'history-thumb';
+                    img.onclick = () => { setPage(2); setTimeout(() => initCanvas(url), 500); };
+                    container.appendChild(img);
+                });
+            }
+
+            $('download-btn').onclick = () => {
+                if(!stage) return showToast("Tidak ada gambar untuk diunduh.", "error");
+                
+                transformer.nodes([]); layer.draw();
+                showToast("Sedang memproses unduhan resolusi tinggi...", "info");
+                
+                setTimeout(() => {
+                    let exportRatio = 1; 
+                    const quality = $('quality-select').value;
+                    if (quality === '8k' || quality === '4k') exportRatio = 2; 
+
+                    const dataURL = stage.toDataURL({ pixelRatio: exportRatio, mimeType: 'image/png' });
+                    const link = document.createElement('a');
+                    link.download = `Xpro-Studio-${Date.now()}.png`;
+                    link.href = dataURL;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                    showToast("Gambar berhasil diunduh!", "success");
+                }, 100);
+            };
+
+            $('back-to-ai-settings-btn').onclick = () => setPage(1);
+            $('reset-button').onclick = () => { 
+                $('title-input').value = ''; $('body-text-input').value = ''; updateText(); $('reset-filters-btn').click(); 
+                showToast("Kanvas dibersihkan.", "info");
+            };
+
+            const addDialogueRow = (name = "Karakter Baru") => {
+                const container = $('dialogue-container');
+                const div = document.createElement('div');
+                div.className = 'relative bg-gray-950/50 p-3 rounded-xl border border-gray-700/50 mb-3 transition-all hover:border-purple-500/50 group'; 
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center flex-1 gap-2">
+                            <label class="text-xs text-purple-300 font-bold bg-purple-900/30 px-2 py-1 rounded">${name}</label>
+                            <select class="bg-gray-800 text-[10px] text-gray-300 border border-gray-600 rounded px-1.5 py-1 outline-none"><option value="Puck">Puck (Enerjik)</option><option value="Aoede">Aoede (Lembut)</option><option value="Charon">Charon (Berat)</option></select>
+                        </div>
+                        <button class="delete-row-btn text-gray-500 hover:text-red-400 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                    </div>
+                    <textarea class="w-full p-2 bg-transparent border-b border-gray-700 text-white text-sm focus:border-purple-500 outline-none resize-none" rows="2" maxlength="80" placeholder="Ketik apa yang mereka ucapkan di sini..."></textarea>
+                `;
+                div.querySelector('.delete-row-btn').onclick = () => div.remove();
+                container.appendChild(div);
+            };
+
+            $('add-dialogue-btn').onclick = () => addDialogueRow();
+            $('video-scene-prompt-btn').onclick = () => openModal('video-scene-modal');
+            
+            $('analyze-scene-btn').onclick = async () => {
+                if (!lastGeneratedImageBase64) return showToast("Tidak ada gambar untuk dianalisis!", "error");
+                $('dialogue-container').innerHTML = '';
+                addDialogueRow("Karakter 1 (Kiri)"); addDialogueRow("Karakter 2 (Kanan)");
+                showToast("Analisis AI Selesai. Karakter ditambahkan.", "success");
+            };
+
+            $('generate-video-prompt-btn').onclick = async () => {
+                if (!lastGeneratedImageBase64) return showToast("Tidak ada gambar untuk dianalisis! Generate gambar terlebih dahulu.", "error");
+
+                const btn = $('generate-video-prompt-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<svg class="w-5 h-5 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+                btn.disabled = true;
+
+                const tone = $('video-tone-select').value;
+                const duration = $('video-duration').value;
+                const customInst = $('video-custom-instruction').value.trim();
+
+                let dialogText = "";
+                document.querySelectorAll('#dialogue-container > div').forEach(div => {
+                    const charName = div.querySelector('label').innerText;
+                    const charLine = div.querySelector('textarea').value.trim();
+                    if (charLine) dialogText += `${charName}: "${charLine}"\n`;
+                });
+
+                const promptText = `Act as an expert AI Video Director. Analyze the provided image and write a highly detailed prompt for an AI video generation tool (like Sora, Runway Gen-3, or Pika).
+                
+                Video Tone: ${tone}
+                Duration context: ~${duration} seconds.
+                ${customInst ? "User specific instructions for motion/camera: " + customInst : "Give a natural, cinematic camera movement fitting the scene."}
+                ${dialogText ? "Incorporate these character dialogues emotionally into the scene description if applicable:\n" + dialogText : ""}
+                
+                Return ONLY the final video generation prompt in English. Make it highly descriptive, focusing on smooth motion, subject actions, lighting changes, and dynamic camera angles. Do not include any introductory or concluding text.`;
+
+                try {
+                    const payload = { contents: [{ role: "user", parts: [ { text: promptText }, { inlineData: { mimeType: "image/png", data: lastGeneratedImageBase64 } } ] }] };
+                    const res = await fetch(`${TEXT_API_URL}?key=${getApiKey()}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error.message);
+                    
+                    const finalPrompt = data.candidates[0].content.parts[0].text.trim();
+                    $('video-prompt-result').classList.remove('hidden');
+                    $('video-output').value = finalPrompt;
+                    showToast("Prompt Video Selesai Dibuat!", "success");
+                } catch (error) { showToast("Gagal membuat prompt video: " + error.message, "error"); } 
+                finally { btn.innerHTML = originalText; btn.disabled = false; }
+            };
+
+            $('copy-video-prompt-btn').onclick = () => copyToClipboard($('video-output').value, $('copy-video-prompt-btn'));
+
+            $('voiceover-prompt-btn').onclick = () => { openModal('voiceover-modal'); $('voiceover-output').value = "Tulis skrip narasi panjang di sini... Anda bisa menggunakan teks ini untuk AI Voice Generator lain."; };
+            $('caption-hashtag-btn').onclick = () => { 
+                openModal('caption-hashtag-modal'); 
+                $('caption-output').value = "Menakjubkan! ✨ Apa pendapat kalian tentang pemandangan ini? Tulis di komentar ya! 👇"; 
+                $('hashtags-output').innerText = "#AIArt #DigitalArt #XproStudio #KaryaAI #Desain #Kreatif";
+            };
+
+            setTimeout(() => addDialogueRow("Narator"), 500); 
+        });
     </script>
 </body>
 </html>

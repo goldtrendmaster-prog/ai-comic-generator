@@ -1,1 +1,1 @@
-# ai-comic-generator
+# SAB Image Studio
